@@ -1,0 +1,99 @@
+对诗词进行情感分析
+
+可以用机器学习来研究诗词和情感标注。以下是一个简单的示例，演示如何使用机器学习（例如深度学习）来对诗词进行情感分析：
+
+1.准备数据集：你需要一个包含诗词和对应情感标签的数据集。
+
+2.数据预处理：包括分词、向量化和标准化等。
+
+3.构建模型：使用合适的模型进行训练，如CNN、LSTM或BERT等。
+
+4.训练模型：用训练数据训练模型。
+
+5.验证和测试模型：用验证数据调参，用测试数据评估模型效果。
+
+6.预测情感：输入新的诗词,对情感分类进行预测。
+
+情感分析：正面（positive）和负面（negative）情感分类
+or
+情感分析：积极（positive）和消极（negative）和中性（neutral）情感分类
+
+
+
+1: 准备数据集
+假设你有一个包含诗词和情感标签的数据集：data
+
+data = {
+    'text': [
+        '明月几时有，把酒问青天。',
+        '今宵酒醒何处？杨柳岸晓风残月。',
+        '无言独上西楼，月如钩。',
+            ],
+    'label': ['positive', 'negative', 'neutral']
+}
+积极 (positive): 1  
+消极 (negative): 0 
+
+
+2: 数据预处理
+import numpy as np
+import tensorflow as tf
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from tensorflow.keras.preprocessing.text import Tokenizer
+from tensorflow.keras.preprocessing.sequence import pad_sequences
+
+# 标签编码
+label_encoder = LabelEncoder()
+labels = label_encoder.fit_transform(labels)
+
+# 文本分词和向量化
+tokenizer = Tokenizer(num_words=10000)
+tokenizer.fit_on_texts(texts)
+sequences = tokenizer.texts_to_sequences(texts)
+padded_sequences = pad_sequences(sequences, maxlen=20)
+
+# 划分训练集和测试集
+X_train, X_test, y_train, y_test = train_test_split(padded_sequences, labels, test_size=0.2, random_state=42)
+
+
+3: 构建模型
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Embedding, Conv1D, GlobalMaxPooling1D, Dense
+
+# 构建模型
+model = Sequential([
+    Embedding(input_dim=10000, output_dim=128, input_length=20),
+    Conv1D(128, 5, activation='relu'),
+    GlobalMaxPooling1D(),
+    Dense(10, activation='relu'),
+    Dense(1, activation='sigmoid')
+])
+
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
+# 打印模型摘要
+model.summary()
+
+
+4: 训练模型
+history = model.fit(X_train, y_train, epochs=10, batch_size=32, validation_split=0.2, verbose=2)
+
+
+5: 验证和测试模型
+# 评估模型
+score = model.evaluate(X_test, y_test, verbose=0)
+print(f"Test loss: {score[0]}")
+print(f"Test accuracy: {score[1]}")
+
+
+6: 情感预测
+# 测试诗词的情感预测
+poem = "雪消楼外山。正秦淮，翠溢回澜。"
+sequence = tokenizer.texts_to_sequences([poem])
+padded_sequence = pad_sequences(sequence, maxlen=20)
+predicted_label = model.predict(padded_sequence)
+print(f"Predicted sentiment: {'positive' if predicted_label[0][0] > 0.5 else 'negative'}")
+
+
+positive  -- 情感分类为积极（positive）
